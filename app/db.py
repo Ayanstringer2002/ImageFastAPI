@@ -23,3 +23,5 @@ class Post(DeclarativeBase):
     file_name = Column(String, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
+
+
