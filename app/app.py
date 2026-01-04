@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException
-from app.schemas import PostCreate
+from app.schemas import PostCreate, PostResponse
 
 app = FastAPI()
 
@@ -13,13 +13,15 @@ def get_all_posts():
     return text_posts
 
 @app.get("/posts/{id}") ## This fetches only particular id posts
-def get_post(id: int):
+def get_post(id: int) -> PostResponse:
     if id not in text_posts:
         raise HTTPException(status_code=404, detail="POST not found")
     return text_posts.get(id)
 
 @app.post("/posts")
-def create_post(post: PostCreate):
+def create_post(post: PostCreate) -> PostResponse:
     new_post = {"title": post.title, "content": post.content}
     text_posts[max(text_posts.keys()) + 1] = new_post
     return new_post
+
+## PostResponse - It creates a validation that only that type of data is allowed
