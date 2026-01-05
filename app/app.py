@@ -1,17 +1,24 @@
 from fastapi import FastAPI, HTTPException, File, UploadFile, Form, Depends
-from app.schemas import PostCreate, PostResponse
 from app.db import Post, create_db_and_tables, get_async_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from contextlib import asynccontextmanager
 from sqlalchemy import select
+from app.images import imagekit
+
+import shutil
+import os
+import uuid
+import tempfile
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await create_db_and_tables()
     yield
-    
+
 
 app = FastAPI(lifespan=lifespan)
+
 
 @app.post("/upload")
 async def upload_file(
@@ -31,6 +38,7 @@ async def upload_file(
     await session.commit()
     await session.refresh(post)
     return post
+
 
 
  ## Retrieving Data
@@ -54,3 +62,5 @@ async def get_feed(
             }
         )
     return {"posts": posts_data}
+
+
