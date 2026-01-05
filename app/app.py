@@ -19,7 +19,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-
+## Creating a POST Request
 @app.post("/upload")
 async def upload_file(
     file: UploadFile = File(...),
@@ -44,7 +44,7 @@ async def upload_file(
  ## Retrieving Data
 @app.get("/feed")
 async def get_feed(
-    ## This is dependecncy injection
+    ## This is dependency injection
     session:AsyncSession = Depends(get_async_session)
 ):
     result = await session.execute(select(Post).order_by(Post.created_at.desc()))
@@ -62,5 +62,24 @@ async def get_feed(
             }
         )
     return {"posts": posts_data}
+
+## Delete the post
+@app.delete("/posts/{post_id}")
+async def delete_post(post_id: str, session: AsyncSession = Depends(get_async_session)):
+    try:
+        post_uuid = uuid.UUID(post_id)
+        result = await session.execute(select(Post).where(Post.id == post_uuid))
+        post = result.scalars().first()
+        if not post:
+            raise HTTPException(status_code=404, detail="Post not found")
+        await session.delete(post)
+        await session.commit()
+        return {"success": True, "message": "Post deleted successfully"}
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+        
+        
 
 
